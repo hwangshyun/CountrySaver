@@ -6,6 +6,7 @@ import { getSelectedCountries } from "../api/getSelectedCountries";
 import { deleteCountry } from "../api/deleteCountry";
 import CountryCard from "./CountryCard";
 import styled from "styled-components";
+import Swal from "sweetalert2";
 
 const StyledCountryBox = styled.div`
   display: grid;
@@ -26,19 +27,31 @@ const StyledSaveButton = styled.button`
   &:hover {
     transform: scale(1.1);
     background-color: #ffe8be;
-    border: none; 
+    border: none;
   }
 `;
 
 const CountryList: React.FC = () => {
   const [countries, setCountries] = React.useState<Country[]>([]);
-  const [selectedCountries, setSelectedCountries] = React.useState<Country[]>([]);
+  const [selectedCountries, setSelectedCountries] = React.useState<Country[]>(
+    []
+  );
 
   const handleSelectCountry = (country: Country): void => {
-    if (!selectedCountries.find((selectedCountry: Country) => selectedCountry.name.common === country.name.common)) {
+    if (
+      !selectedCountries.find(
+        (selectedCountry: Country) =>
+          selectedCountry.name.common === country.name.common
+      )
+    ) {
       setSelectedCountries([...selectedCountries, country]);
     } else {
-      setSelectedCountries(selectedCountries.filter((selectedCountry: Country) => selectedCountry.name.common !== country.name.common));
+      setSelectedCountries(
+        selectedCountries.filter(
+          (selectedCountry: Country) =>
+            selectedCountry.name.common !== country.name.common
+        )
+      );
     }
   };
 
@@ -47,10 +60,12 @@ const CountryList: React.FC = () => {
     const existingCountries = await getSelectedCountries();
 
     // 삭제된 나라들을 찾아서 Supabase에서 삭제합니다.
-    const countriesToDelete = existingCountries.filter((existingCountry: Country) => 
-      !selectedCountries.find((selectedCountry: Country) => 
-        selectedCountry.name.common === existingCountry.name.common
-      )
+    const countriesToDelete = existingCountries.filter(
+      (existingCountry: Country) =>
+        !selectedCountries.find(
+          (selectedCountry: Country) =>
+            selectedCountry.name.common === existingCountry.name.common
+        )
     );
 
     for (const country of countriesToDelete) {
@@ -59,7 +74,12 @@ const CountryList: React.FC = () => {
 
     // 나머지 나라들을 Supabase에 저장합니다.
     await saveSelectedCountries(selectedCountries);
-    alert("저장됐습니다~하핫");
+    Swal.fire({
+      title: "저장 완료",
+      text: "선택된 나라가 저장됐습니다~하핫",
+      icon: "success",
+      confirmButtonText: "확인",
+    });
   };
 
   React.useEffect(() => {
